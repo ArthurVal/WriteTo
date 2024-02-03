@@ -14,6 +14,10 @@ template <
     std::enable_if_t<details::IsValidStringFormat_v<FmtValType>, bool> = true>
 constexpr auto WriteTo(std::span<char> &view, T &&t) -> void {
 
+  auto &&str = std::forward<T>(t).value;
+
+  using ValueType = std::decay_t<decltype(str)>;
+
   const auto [str_begin, str_size] = [&]() {
     if constexpr (std::is_same_v<ValueType, char>) {
       return std::make_pair(&t.value, 1);
@@ -32,7 +36,7 @@ constexpr auto WriteTo(std::span<char> &view, T &&t) -> void {
 
   const auto written = std::min(view.size(), str_size);
   std::copy_n(str_begin, written, std::begin(view));
-  view = array.subspan(written);
+  view = view.subspan(written);
 }
 } // namespace wrt
 
